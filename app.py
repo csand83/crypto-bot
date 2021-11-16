@@ -90,7 +90,7 @@ def generate_page():
         # these are TOTAL values (USD + BTC * BTCUSD_close)
         # Profit from start. Displayed string: Runtime accuracy: 	52.8%, +1.62 USD (+1.6%)
         profit_from_start = current_total_value_USD - starting_total_value_USD
-        profit_from_start_pct = ((current_total_value_USD / starting_total_value_USD) - 1) * 100
+        #profit_from_start_pct = ((current_total_value_USD / starting_total_value_USD) - 1) * 100
         if profit_from_start > 0:
             profit_from_start_text = f'+{profit_from_start:.2f} USD (+{profit_from_start_pct:.2f}%)'
         elif profit_from_start < 0:
