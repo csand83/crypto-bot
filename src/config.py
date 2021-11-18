@@ -41,7 +41,7 @@ ENVIROMENT = cfg['DEFAULT']['ENVIROMENT']  # testnet or mainnet
 LOG_FILE_ABS = os.path.abspath(os.path.join(PROJECT_PATH_ABS, LOG_FILE))
 
 logging.basicConfig(filename=LOG_FILE_ABS,
-                    level=logging.DEBUG,  # DEBUG is the lowest - the most information
+                    level=logging.INFO,  # DEBUG is the lowest - the most information
                     format="%(asctime)s [%(levelname)s] %(message)s",
                     datefmt='%Y-%m-%d %H:%M:%S')
 logging.Formatter.converter = time.gmtime  # logs will be in gmt (UTC+0)
