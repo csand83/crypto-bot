@@ -23,7 +23,7 @@ def update_ratio(ratio, filename, request_records=500, fill_missing=False):
     # e.g. 18:00 close is like 18:59:59 so we can get 18:00 close price (UTC+0) at 18:59:59 so 19:01
     # so we can request new price after constant 2 hours passed from last record (+ few seconds just to be sure)
     # also thats why cron job is set to 1 * * * *
-    seconds_remaining = timedelta(hours=2, seconds=10).seconds - seconds_from_last_update
+    seconds_remaining = timedelta(minutes=2, seconds=10).seconds - seconds_from_last_update
     if seconds_remaining > 0:
         logger.warning(f'[UPDATE] No new records available yet. Try again in: {str(timedelta(seconds=seconds_remaining))}')
         return False
@@ -37,7 +37,7 @@ def update_ratio(ratio, filename, request_records=500, fill_missing=False):
         temp_df = pd.DataFrame(columns=['date', f'{ratio}_close', f'{ratio}_volume'])
         response = get('https://api.binance.com/api/v1/klines',
                        params={'symbol': ratio,
-                               'interval': '1h',
+                               'interval': '5m',
                                'startTime': last_record_unix + (i * request_records * 3600 * 1000),
                                'limit': request_records})  # last_record_unix also limits number of records, if it's recent
         raw_data = loads(response.content)
@@ -64,11 +64,11 @@ def update_ratio(ratio, filename, request_records=500, fill_missing=False):
 
     # check for gaps in timestamps and interpolate if found
     new_df.index = pd.to_datetime(new_df.index)
-    expected_range = pd.date_range(start=new_df.index.min(), end=new_df.index.max(), freq='H')
+    expected_range = pd.date_range(start=new_df.index.min(), end=new_df.index.max(), freq='5m')
 
     missing_ts = list(expected_range.difference(new_df.index))
     if missing_ts and (fill_missing is True):
-        new_df = new_df.resample('60min').mean()
+        new_df = new_df.resample('5min').mean()
         new_df.replace(to_replace=0, value=np.nan, inplace=True)  # converting 0s to NaNs
         new_df.interpolate(method='linear', inplace=True)  # interpolating missing NaNs
 
@@ -88,7 +88,7 @@ def update_ratio(ratio, filename, request_records=500, fill_missing=False):
 def update_all_data(fill_missing=False):
     dict_name_ratio_df = {}
     for ratio in RATIOS:
-        filename = f"{DATA_PATH_ABS}Binance_{ratio}_1h.csv"
+        filename = f"{DATA_PATH_ABS}Binance_{ratio}_5m.csv"
         time.sleep(0.2)  # to not spam the exchange
         # 336 hourly records = 14 days, if files havent been updated for longer time,
         # just update them again until "No new records available yet." encountered

@@ -1,7 +1,9 @@
 
 import numpy as np
 import pandas as pd
-import tflite_runtime.interpreter as tflite
+#import tflite_runtime.interpreter as tflite
+import tensorflow as tf
+from tensorflow import keras
 from sklearn import preprocessing
 from collections import deque
 from src.config import RATIOS, RATIO_TO_PREDICT, SEQ_LEN, MODEL_PATH_ABS, DATA_PATH_ABS, logger
@@ -14,7 +16,7 @@ def construct_df_for_pred(ratios):
     main_df = pd.DataFrame()
     # 'unix,date,symbol,open,high,low,close,Volume LTC,Volume USDT,tradecount'
     for ratio in ratios:
-        dataset = f"{DATA_PATH_ABS}Binance_{ratio}_1h.csv"
+        dataset = f"{DATA_PATH_ABS}Binance_{ratio}_5m.csv"
         df = pd.read_csv(dataset, nrows=None, skiprows=None, parse_dates=['date'], usecols=[0, 1, 2])
         df.set_index("date", inplace=True)
 
@@ -39,6 +41,7 @@ def preprocess_data_for_pred(df):
     for col in df.columns:
         # here we lose 1 row
         df[col] = df[col].pct_change()  # converted to percentage change
+        df.replace([np.inf, -np.inf], np.nan, inplace=True) # converted to percentage change
         # example:
         # hour 1:00 close = 93.13, hour 2:00 close = 92.41, so
         # 93.13 + 93.13 * x = 92.41, x = -0.007731
@@ -71,15 +74,17 @@ def predict_next():
     main_df = construct_df_for_pred(RATIOS)
     preprocessed_sequences = preprocess_data_for_pred(main_df)
 
-    interpreter = tflite.Interpreter(model_path=MODEL_PATH_ABS)
-    interpreter.allocate_tensors()
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    data_for_tflite = np.array(preprocessed_sequences[0], dtype=np.float32)  # doesnt work without dtype=np.float32
-    interpreter.set_tensor(input_details[0]['index'], data_for_tflite)
-    interpreter.invoke()
-
-    predictions = interpreter.get_tensor(output_details[0]['index'])
+    #interpreter = tflite.Interpreter(model_path=MODEL_PATH_ABS)
+    model = keras.models.load_model(MODEL_PATH_ABS)
+    #interpreter.allocate_tensors()
+    #input_details = interpreter.get_input_details()
+    #output_details = interpreter.get_output_details()
+    #data_for_tflite = np.array(preprocessed_sequences[0], dtype=np.float32)  # doesnt work without dtype=np.float32
+    #interpreter.set_tensor(input_details[0]['index'], data_for_tflite)
+    #interpreter.invoke()
+    predictions = model.predict(preprocessed_sequences[0])
+    #predictions = interpreter.get_tensor(output_details[0]['index'])
+    print(predictions)
     probabilities = predictions[0]
 
     def classifier(prob):

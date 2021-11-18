@@ -21,7 +21,7 @@ def download_data(starting_time, ratio, filename):
 
     response = get('https://api.binance.com/api/v1/klines',
                 params={'symbol': ratio,
-                        'interval': '1h',
+                        'interval': '5m',
                         'startTime': last_record_unix,
                         'limit': 1000})
     raw_data = loads(response.content)
@@ -37,12 +37,12 @@ def download_data(starting_time, ratio, filename):
     new_df = new_df[:-1]  # dropping that entry
 
     new_df.index = pd.to_datetime(new_df.index)
-    expected_range = pd.date_range(start=new_df.index.min(), end=new_df.index.max(), freq='H')
+    expected_range = pd.date_range(start=new_df.index.min(), end=new_df.index.max(), freq='5M')
     missing_ts = list(expected_range.difference(new_df.index))
     if missing_ts:
         # inp = input(f'Missing timestamps: {missing_ts}.\n'
         #             f'{len(expected_range) - len(new_df.index)} missing timestamps. y - interpolate, n - exit\n')
-        new_df = new_df.resample('60min').mean()
+        new_df = new_df.resample('5min').mean()
         new_df.replace(to_replace=0, value=np.nan, inplace=True)  # converting 0s to NaNs
         new_df.interpolate(method='linear', inplace=True)  # interpolating missing nan values
         print(f'Missing timestamps: {missing_ts}.\n'
@@ -55,11 +55,11 @@ def data_add_new_pair():
     ratio = ['XRPUSDT']  # ["BCHUSDT"]
     starting_time = datetime.strptime('2017-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
     # it only downloads first 500 records, to get all data use update_data() on new pair .csv file
-    filename = f"{DATA_PATH_ABS}Binance_{ratio}_1h.csv"
+    filename = f"{DATA_PATH_ABS}Binance_{ratio}_5m.csv"
     df_first = download_data(starting_time, ratio, filename)
     df_first.to_csv(filename)
     while True:  # added data_update from src.data_update.py
-        filename = f"{DATA_PATH_ABS}Binance_{ratio}_1h.csv"
+        filename = f"{DATA_PATH_ABS}Binance_{ratio}_5m.csv"
         time.sleep(0.3)
         new_df = update_ratio(ratio, filename, request_records=1000, fill_missing=True)
         new_df.to_csv(filename, mode='a', header=False)

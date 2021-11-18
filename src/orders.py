@@ -49,7 +49,7 @@ def get_last_price():
 
 
 def get_last_data_price():
-    with open(f"{DATA_PATH_ABS}Binance_BTCUSDT_1h.csv", 'r') as file:
+    with open(f"{DATA_PATH_ABS}Binance_BTCUSDT_5m.csv", 'r') as file:
         last_data_price = float(file.readlines()[-1].split(',')[1])  # -1 bcs last line and 1 bcs (date, close, volume)
     return last_data_price
 

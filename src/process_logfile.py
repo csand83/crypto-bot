@@ -14,7 +14,7 @@ def process_logfile():
         elif current > future:
             return 'DOWN'
 
-    df = pd.read_csv(f'{DATA_PATH_ABS}Binance_BTCUSDT_1h.csv', parse_dates=['date'], usecols=[0, 1])  # volume not required
+    df = pd.read_csv(f'{DATA_PATH_ABS}Binance_BTCUSDT_5m.csv', parse_dates=['date'], usecols=[0, 1])  # volume not required
     df.set_index("date", inplace=True)
     # shifted by 72h for 72h chart, so if we pass current date as STARTING_TIMESTAMP, it will still plot full chart
     df = df.truncate(before=shift_hour_trunc(STARTING_TIMESTAMP, h=-72))

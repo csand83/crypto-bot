@@ -23,7 +23,7 @@ def construct_df_for_multiple_pred(ratios):
     # 'unix,date,symbol,open,high,low,close,Volume LTC,Volume USDT,tradecount'
     for ratio in ratios:
         # drive_path = 'drive/MyDrive/Colab Notebooks/crypto_prediction/model3/data/'
-        dataset = f"{DATA_PATH_ABS}Binance_{ratio}_1h.csv"
+        dataset = f"{DATA_PATH_ABS}Binance_{ratio}_5m.csv"
         df = pd.read_csv(dataset, nrows=None, skiprows=None, parse_dates=['date'], usecols=[0, 1, 2])
         df.set_index("date", inplace=True)
 
