@@ -73,7 +73,9 @@ def preprocess_data_for_pred(df):
 def predict_next():
     main_df = construct_df_for_pred(RATIOS)
     preprocessed_sequences = preprocess_data_for_pred(main_df)
+    print(len(preprocessed_sequences))
     print(preprocessed_sequences)
+    print(preprocessed_sequences[0])
     #interpreter = tflite.Interpreter(model_path=MODEL_PATH_ABS)
     model = keras.models.load_model(MODEL_PATH_ABS)
     #interpreter.allocate_tensors()
